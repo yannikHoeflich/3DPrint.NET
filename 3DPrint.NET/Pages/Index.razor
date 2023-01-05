@@ -1,0 +1,368 @@
+﻿@page "/"
+
+@inject Printer printer
+
+<PageTitle>Index</PageTitle>
+
+<div class="container side-bar">
+    <div class="container connection border">
+        <div class="head">
+            <h5>Connection</h5>
+            <span class="oi oi-reload" @onclick="RefreshConnection"></span>
+        </div>
+        <div class="content">
+            <table>
+                <tbody>
+                    <tr>
+                        <td>Connection</td>
+                        <td class="@printer.State.ConnectionState.GetColorClass()">@printer.State.ConnectionState.ToWords()</td>
+                    </tr>
+                    <tr>
+                        <td>Port</td>
+                        <td>
+                            <select class="form-select" aria-label="Serial Port Select" @onchange="SerialPortChange">
+                                @if (_selectedSerialPorts == null) {
+                                    <option selected>Select Serial Port</option>
+                                }
+                                @foreach (var port in _serialPorts) {
+                                    @if (_selectedSerialPorts == port) {
+                                        <option value="@port" selected>@port</option>
+                                    } else {
+                                        <option value="@port">@port</option>
+                                    }
+                                }
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Baud Rate</td>
+                        <td>
+                            <select class="form-select" aria-label="Serial Port Select" @onchange="BaudRateChange">
+                                @if (SerialMonitor.CurrentBaudRate == 0) {
+                                    <option selected>Select Baud Rate</option>
+                                }
+                                @foreach (var rate in _baudRates) {
+                                    @if (SerialMonitor.CurrentBaudRate == rate) {
+                                        <option value="@rate" selected>@rate</option>
+                                    } else {
+                                        <option value="@rate">@rate</option>
+                                    }
+                                }
+                            </select>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <div class="container data border">
+        <div class="head">
+            <h5>Printer Stats</h5>
+        </div>
+        <div class="content">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Data</th>
+                        <th scope="col">Value</th>
+                        <th scope="col">Target</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td scope="row">Hot end Temp</td>
+                        <td>@printer.State.Temperatures.HotEnd.Current</td>
+                        <td>@printer.State.Temperatures.HotEnd.Target</td>
+                    </tr>
+                    <tr>
+                        <td scope="row">Bed Temp</td>
+                        <td>@printer.State.Temperatures.Bed.Current</td>
+                        <td>@printer.State.Temperatures.Bed.Target</td>
+                    </tr>
+                    <tr>
+                        <td scope="row">Position</td>
+                        <td>
+                            X: @(Math.Round(printer.State.Position.X * 10) / 10)<br />
+                            Y: @(Math.Round(printer.State.Position.Y * 10) / 10)<br />
+                            Z: @(Math.Round(printer.State.Position.Z * 10) / 10)<br />
+                        </td>
+                        <td>-<br />-<br />-</td>
+                    </tr>
+                    <tr>
+                        <td scope="row">Width</td>
+                        <td>@(_printerSize.X)mm</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td scope="row">Length</td>
+                        <td>@(_printerSize.Y)mm</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td scope="row">Height</td>
+                        <td>@(_printerSize.Z)mm</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td scope="row">Fan Speed</td>
+                        <td>@(Math.Round(printer.State.FanSpeed * 100 * 10) / 10)%</td>
+                        <td>-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="container border action-notifications">
+        <div class="head">
+            <h5>Action Notifications</h5>
+        </div>
+        <div class="content">
+            @foreach (var message in printer.State.ActionNotifications) {
+                <p>@message</p>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="container main">
+    @if (printer.IsPrinting) {
+        <div class="container border print-options">
+            <div class="head">
+                <h5>Printing options</h5>
+            </div>
+            <div class="content">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <td>Progress</td>
+                            <td>@(Math.Round(printer.CurrentPrint.GetPrintingProgress() * 100 * 10) / 10)%</td>
+                        </tr>
+                        <tr>
+                            <td>Total Time</td>
+                            <td>@printer.CurrentPrint.TotalTime.ToString(@"hh\:mm\:ss")</td>
+                        </tr>
+                        <tr>
+                            <td>Print Time</td>
+                            <td>@TimeSpan.FromSeconds((int)printer.CurrentPrint.ElapsedTime.TotalSeconds).ToString(@"hh\:mm\:ss")</td>
+                        </tr>
+                        <tr>
+                            <td>Print Time Left</td>
+                            <td>@TimeSpan.FromSeconds((int)printer.CurrentPrint.TotalTime.TotalSeconds - (int)printer.CurrentPrint.ElapsedTime.TotalSeconds).ToString(@"hh\:mm\:ss")</td>
+                        </tr>
+                    </tbody>
+                </table>
+                @if (printer.PrintState == PrintState.Paused) {
+                    <button type="button" class="btn btn-success" @onclick="ResumePrint">Resume</button>
+                } else {
+                    <button type="button" class="btn btn-warning" @onclick="PausePrint">Pause</button>
+                }
+                <button type="button" class="btn btn-danger" @onclick="CancelPrint">Cancel</button>
+            </div>
+        </div>
+    } else {
+        <FileDropDown OnNewFile="@NewFile" />
+    }
+
+    <div class="container border printer-controller">
+        <div class="head">
+            <h5>Controlls</h5>
+        </div>
+        <div class="content">
+            <div class="container border controller-container">
+                <div class="head">
+                    <h5>Position</h5>
+                </div>
+                <div class="content">
+                    <div class="controllers">
+                        <PrinterController LeftRight="true" OnButtonClicked="@HorizotalMoveClick" />
+                        <PrinterController LeftRight="false" OnButtonClicked="@VerticalMoveClick" style="margin-left: 40px;" />
+                    </div>
+                    <button type="button" class="btn btn-primary auto-home-button" @onclick="AutoHomeClick">Auto Home</button>
+                </div>
+            </div>
+            <div class="container border extrusion-container">
+                <div class="head">
+                    <h5>Extrusion</h5>
+                </div>
+                <div class="content">
+                    <PrinterController LeftRight="false" OnButtonClicked="@ExtrusionButtonClicked" />
+                </div>
+            </div>
+            <div class="container border temperature-controller">
+                <div class="head">
+                    <h5>Temperatures</h5>
+                </div>
+                <div class="content">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="basic-addon1">Nozzle</span>
+                        <input type="number" class="form-control" @bind-value="_hotEndTemp">
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="basic-addon1">Bed</span>
+                        <input type="number" class="form-control" @bind-value="_bedTemp">
+                    </div>
+                    <button type="button" class="btn btn-primary" @onclick="UpdateTemperatures">Update</button>
+                </div>
+            </div>
+            <div class="container border fan-controller">
+                <div class="head">
+                    <h5>Fan</h5>
+                </div>
+                <div class="content">
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td>Speed</td>
+                                <td><input type="range" class="form-range" min="0" max="1" step="0.01" id="speed-range" @bind-value="@_fanSpeed"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button type="button" class="btn btn-primary" @onclick="UpdateFan">Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<Modal Title="Print" Content="@_printFileName" CancelText="No" SubmitText="Yes" Visible="@_printDialogVisible" OnSubmit="@PrintFile" OnCancel="@DisposeFile" />
+
+@code {
+    private Coordinate _printerSize;
+
+    private string[] _serialPorts = Array.Empty<string>();
+    private string? _selectedSerialPorts = null;
+
+    private bool _printDialogVisible = false;
+    private string _printFileName = "";
+    private Stream _fileStream;
+
+    private double _hotEndTemp = 0;
+    private double _bedTemp = 0;
+    private double _fanSpeed;
+
+    private int[] _baudRates = SerialMonitor.GetBaudRates();
+
+    protected override async Task OnInitializedAsync() {
+        _hotEndTemp = printer.State.Temperatures.HotEnd.Target;
+        _bedTemp = printer.State.Temperatures.Bed.Target;
+        _fanSpeed = printer.State.FanSpeed;
+
+        Task.Run(async () => {
+            while (true) {
+                await Task.Delay(100);
+                await InvokeAsync(StateHasChanged);
+            }
+        });
+
+        _printerSize = printer.State.GetSize();
+
+        await RefreshSerialPorts();
+    }
+
+    private async Task NewFile(IBrowserFile file) {
+        try {
+            using Stream stream = file.OpenReadStream(1_000_000_000);
+            _fileStream = new MemoryStream();
+            await stream.CopyToAsync(_fileStream);
+            _fileStream.Position = 0;
+            _printDialogVisible = true;
+            _printFileName = $"Do you want to print '{file.Name}'?";
+        } catch {
+
+        }
+    }
+
+    private async Task PrintFile() {
+        _printDialogVisible = false;
+        await printer.Print(_fileStream);
+    }
+
+    private async Task CancelPrint() {
+        await printer.CurrentPrint.CancelPrintAsync();
+    }
+
+    private async Task PausePrint() {
+        await printer.CurrentPrint.PausePrintAsync();
+    }
+
+    private async Task ResumePrint() {
+        await printer.CurrentPrint.ResumePrintAsync();
+    }
+
+    private async Task DisposeFile() {
+        _printDialogVisible = false;
+        await _fileStream.DisposeAsync();
+    }
+
+    private async Task SerialPortChange(ChangeEventArgs args) {
+        if (args.Value is not string newPort)
+            return;
+        _selectedSerialPorts = newPort;
+        await SerialMonitor.ChangeSerialPortAsync(newPort);
+    }
+
+    private async Task BaudRateChange(ChangeEventArgs args) {
+        if (args.Value is not string rateStr || !int.TryParse(rateStr, out int rate))
+            return;
+
+        await SerialMonitor.ChangeBaudRateAsync(rate);
+    }
+
+    private async Task RefreshConnection() {
+        await RefreshSerialPorts();
+        await SerialMonitor.UpdateConnectionState();
+    }
+
+    private async Task RefreshSerialPorts() {
+        _serialPorts = await SerialMonitor.GetSerialPortNamesAsync();
+        _selectedSerialPorts = SerialMonitor.CurrentSerialPort;
+    }
+
+
+    private async Task HorizotalMoveClick(Direction direction) {
+        var moveTask = direction switch {
+            Direction.Up => printer.MoveByAsync(y: 10),
+            Direction.Down => printer.MoveByAsync(y: -10),
+            Direction.Right => printer.MoveByAsync(x: 10),
+            Direction.Left => printer.MoveByAsync(x: -10),
+            _ => printer.MoveByAsync()
+        };
+
+        await moveTask;
+    }
+
+    private async Task VerticalMoveClick(Direction direction) {
+        var moveTask = direction switch {
+            Direction.Up => printer.MoveByAsync(z: 10),
+            Direction.Down => printer.MoveByAsync(z: -10),
+            _ => printer.MoveByAsync()
+        };
+
+        await moveTask;
+    }
+
+    private async Task ExtrusionButtonClicked(Direction direction) {
+        var moveTask = direction switch {
+            Direction.Up => printer.MoveByAsync(extrude: -10),
+            Direction.Down => printer.MoveByAsync(extrude: 10),
+            _ => printer.MoveByAsync()
+        };
+
+        await moveTask;
+    }
+
+    private async Task AutoHomeClick() {
+        await printer.AutoHomeAsync();
+    }
+
+    private async Task UpdateTemperatures() {
+        await printer.SetTemperatuesAsync(_hotEndTemp, _bedTemp);
+    }
+
+    private async Task UpdateFan() {
+        await printer.SetFanSpeedAsync(_fanSpeed);
+    }
+}

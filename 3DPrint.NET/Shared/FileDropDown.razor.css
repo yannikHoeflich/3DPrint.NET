@@ -1,0 +1,22 @@
+﻿
+.file-drop-down {
+    width: 100%;
+    border-style: dashed !important;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    height: 150px;
+    cursor: pointer;
+}
+
+    .file-drop-down.hover {
+        background: #cacaca
+    }
+
+    .file-drop-down div {
+        text-align: center;
+    }
+
+    .file-drop-down ::deep input {
+        display: none;
+    }

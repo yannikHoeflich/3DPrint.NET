@@ -1,0 +1,50 @@
+﻿.status-bar {
+    position: relative;
+}
+
+.status-bar-checkpoints {
+    display: flex;
+    justify-content: space-between;
+}
+
+.checkpoint {
+    display: inline-block;
+    z-index: 10;
+}
+
+.checkpoint-cirlce {
+    border-radius: 50%;
+    border: 5px #CCC solid;
+    height: 30px;
+    width: 30px;
+    margin-left: auto;
+    margin-right: auto;
+    background: white;
+}
+
+    .checkpoint-cirlce.current {
+        border: 5px #c43535 solid;
+    }
+
+    .checkpoint-cirlce.checked {
+        background: #c43535;
+        border: 5px #c43535 solid;
+    }
+
+.bar {
+    position: absolute;
+    top: 10px;
+    height: 10px;
+}
+
+    .bar.filled {
+        background: #c43535;
+        padding-left: 10px;
+        left: 10px;
+    }
+
+    .bar.empty {
+        background: #CCC;
+        right: 10px;
+        padding-right: 10px;
+    }

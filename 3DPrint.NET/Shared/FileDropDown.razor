@@ -1,0 +1,28 @@
+﻿@inject IJSRuntime _jsRuntime
+
+<label class="container file-drop-down border" @ref="_fileDropContainer">
+    <div class="content">
+        <h5>Drop down GCode file</h5>
+        <h6>Or click to select</h6>
+    </div>
+    <InputFile @ref="_inputFile" OnChange="@OnChange"/>
+</label>
+
+@code {
+    private ElementReference _fileDropContainer;
+    private InputFile _inputFile;
+
+    [Parameter]
+    public EventCallback<IBrowserFile> OnNewFile { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender) {
+        if (!firstRender)
+            return;
+
+        await _jsRuntime.InvokeVoidAsync("initializeFileDropZone", _fileDropContainer, _inputFile.Element);
+    }
+
+    async Task OnChange(InputFileChangeEventArgs e) {
+        await OnNewFile.InvokeAsync(e.File);
+    }
+}

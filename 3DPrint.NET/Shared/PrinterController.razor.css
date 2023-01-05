@@ -1,0 +1,23 @@
+﻿.arrows{
+    display: flex;
+    align-items: end;
+    height: 100px;
+    justify-content: center;
+}
+    .arrows span {
+        border-radius: 10px;
+        margin: 5px;
+        font-size: 20px;
+        border-radius: 5px;
+        border: 1px solid black;
+        width: 45px;
+        height: 45px;
+        text-align: center;
+        line-height: 45px;
+        cursor: pointer;
+    }
+
+    .arrows .updown{
+        display: flex;
+        flex-direction: column;
+    }

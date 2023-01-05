@@ -1,0 +1,24 @@
+﻿@using _3DPrint.NET.Data;
+<div class="arrows" @attributes="@CapturedAttributes">
+    @if (LeftRight) {
+        <span class="oi oi-arrow-thick-left" @onclick="e => OnButtonClicked.InvokeAsync(Direction.Left)"></span>
+    }
+    <div class="updown">
+        <span class="oi oi-arrow-thick-top" @onclick="e => OnButtonClicked.InvokeAsync(Direction.Up)"></span>
+        <span class="oi oi-arrow-thick-bottom" @onclick="e => OnButtonClicked.InvokeAsync(Direction.Down)"></span>
+    </div>
+    @if (LeftRight) {
+        <span class="oi oi-arrow-thick-right" @onclick="e => OnButtonClicked.InvokeAsync(Direction.Right)"></span>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public bool LeftRight { get; set; } = true;
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object> CapturedAttributes { get; set; }
+
+    [Parameter]
+    public EventCallback<Direction> OnButtonClicked { get; set; }
+}

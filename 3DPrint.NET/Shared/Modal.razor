@@ -1,0 +1,60 @@
+﻿@if (Visible) {
+    <div class="modal" aria-labelledby="Do you want to print?" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    @if (Title != null) {
+                        <h1 class="modal-title fs-5" id="exampleModalToggleLabel">@Title</h1>
+                    }
+                    <button type="button" class="btn-close" @onclick="Cancel"></button>
+                </div>
+                @if (Content != null) {
+                    <div class="modal-body">
+                        @Content
+                    </div>
+                }
+                @if (SubmitText != null && CancelText != null) {
+                    <div class="modal-footer">
+                        @if (CancelText != null) {
+                            <button type="button" class="btn btn-secondary" @onclick="Cancel">@CancelText</button>
+                        }
+                        @if (SubmitText != null) {
+                            <button type="button" class="btn btn-primary" @onclick="Submit">@SubmitText</button>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public bool Visible { get; set; }
+
+    [Parameter]
+    public string? Title { get; set; }
+
+    [Parameter]
+    public string? Content { get; set; }
+
+    [Parameter]
+    public string? SubmitText { get; set; }
+
+    [Parameter]
+    public string? CancelText { get; set; }
+
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private async Task Cancel() {
+        await OnCancel.InvokeAsync();
+    }
+
+    private async Task Submit() {
+        await OnSubmit.InvokeAsync();
+    }
+}

@@ -2,9 +2,9 @@
 
 namespace _3DPrint.NET.Logging;
 public class Logger : ILogger {
-    private string _name;
+    private readonly string _name;
 
-    private static object _lock = new object();
+    private static readonly object s_lock = new();
 
     public Logger(string name) {
         _name = name;
@@ -24,7 +24,7 @@ public class Logger : ILogger {
         if (!IsEnabled(logLevel))
             return;
 
-        lock (_lock) {
+        lock (s_lock) {
             Console.Write($"[{DateTime.Now:G}, {_name}] ");
             Console.ForegroundColor = GetColor(logLevel);
             Console.Write($"{logLevel}: ");

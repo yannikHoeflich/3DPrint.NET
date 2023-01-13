@@ -9,8 +9,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Blazor.Extensions.Canvas" Version="1.1.1" />
-		<PackageReference Include="Blazor3D" Version="0.1.24" />
 		<PackageReference Include="System.IO.Ports" Version="7.0.0" />
 		<PackageReference Include="Weikio.PluginFramework" Version="1.5.1" />
 		<PackageReference Include="Weikio.PluginFramework.AspNetCore" Version="1.5.1" />

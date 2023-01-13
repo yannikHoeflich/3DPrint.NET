@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 using _3DPrint.NET.Data.Values;
@@ -102,11 +103,12 @@ public static class ResponseParser
         return values;
     }
 
-    private static readonly Regex s_meshLineRegex = new(@"^\d ([+-]\d+\.\d+ ?)+$", RegexOptions.Compiled);
+    private static readonly Regex s_meshLineRegex = new(@"^\d+[| ]+([+-]\d+\.\d+ *)+$", RegexOptions.Compiled);
+    private static readonly Regex s_numberRegex = new(@"^[\d-.]+$", RegexOptions.Compiled);
     public static double[,] ParseMesh(IEnumerable<string> lines)
     {
         string[] linesWithData = lines.Where(x => s_meshLineRegex.IsMatch(x)).ToArray();
-        IEnumerable<string[]> onlyDataString = linesWithData.Select(x => x.Split(' ')[1..]);
+        IEnumerable<IEnumerable<string>> onlyDataString = linesWithData.Select(x => x.Split(' ')[1..]).Select(x => x.Where(y => s_numberRegex.IsMatch(y)));
         IEnumerable<IEnumerable<double>> data = onlyDataString.Select(x => x.Select(y => double.Parse(y, CultureInfo.InvariantCulture)));
 
         int height = linesWithData.Length;

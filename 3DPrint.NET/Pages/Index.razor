@@ -1,6 +1,8 @@
 ﻿@page "/"
+@using _3DPrint.NET.Extensions;
 
 @inject Printer printer
+@inject IEnumerable<IExtensionComponent> ExtensionComponents
 
 <PageTitle>Index</PageTitle>
 
@@ -125,6 +127,17 @@
             }
         </div>
     </div>
+
+    @foreach (var extensionComponent in ExtensionComponents.Where(x => x.Location == Location.Sidebar)) {
+        <div class="container border">
+            <div class="head">
+                <h5>@extensionComponent.Title</h5>
+            </div>
+            <div class="content">
+                @RenderWidget(extensionComponent)
+            </div>
+        </div>
+    }
 </div>
 
 <div class="container main">
@@ -224,12 +237,25 @@
                 </div>
             </div>
         </div>
+
+        @foreach (var extensionComponent in ExtensionComponents.Where(x => x.Location == Location.Main)) {
+            <div class="container border">
+                <div class="head">
+                    <h5>@extensionComponent.Title</h5>
+                </div>
+                <div class="content">
+                    @RenderWidget(extensionComponent)
+                </div>
+            </div>
+        }
+
     </div>
 </div>
 
 <Modal Title="Print" Content="@_printFileName" CancelText="No" SubmitText="Yes" Visible="@_printDialogVisible" OnSubmit="@PrintFile" OnCancel="@DisposeFile" />
 
 @code {
+
     private Coordinate _printerSize;
 
     private string[] _serialPorts = Array.Empty<string>();
@@ -365,4 +391,11 @@
     private async Task UpdateFan() {
         await printer.SetFanSpeedAsync(_fanSpeed);
     }
-}
+
+    private RenderFragment RenderWidget(IExtensionComponent widget) {
+        return new RenderFragment(builder => {
+            builder.OpenComponent(0, widget.GetType());
+            builder.CloseComponent();
+        });
+    }
+        }

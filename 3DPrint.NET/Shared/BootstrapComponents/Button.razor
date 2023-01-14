@@ -1,0 +1,32 @@
+﻿<button type="button" class="btn @GetClass()" @attributes="@CapturedAttributes" @onclick="ButtonClicked">@Text</button>
+
+@code{
+    [Parameter]
+    public ButtonType ButtonType { get; set; }
+
+    [Parameter]
+    public string Text { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object> CapturedAttributes { get; set; }
+
+    [Parameter]
+    public EventCallback<MouseEventArgs> OnClick { get; set; }
+
+    private string GetClass() => ButtonType switch
+    {
+        ButtonType.Primary => "btn-primary",
+        ButtonType.Secondary => "btn-secondary",
+        ButtonType.Success => "btn-success",
+        ButtonType.Danger => "btn-danger",
+        ButtonType.Warning => "btn-warning",
+        ButtonType.Info => "btn-info",
+        ButtonType.Light => "btn-light",
+        ButtonType.Dark => "btn-dark",
+        ButtonType.Link => "btn-link",
+    };
+
+    private async Task ButtonClicked(MouseEventArgs args) {
+        await OnClick.InvokeAsync(args);
+    }
+}

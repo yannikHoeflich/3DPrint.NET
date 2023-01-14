@@ -6,3 +6,4 @@
 - Warn when switching serial port while printing
 - Readme, docs, etc.
 - Split `Index.razor` in multiple components (maybe in extensions)
+- Save configuration

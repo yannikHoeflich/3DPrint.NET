@@ -1,0 +1,19 @@
+﻿
+.component {
+    display: flex;
+    flex-direction: column;
+    max-height: 300px;
+    overflow: auto;
+    min-height: 100px;
+}
+
+p {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.component :first-child {
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: center;
+}

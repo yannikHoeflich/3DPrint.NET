@@ -8,23 +8,6 @@
         width: 95%;
     }
 
-.action-notifications .content {
-    display: flex;
-    flex-direction: column;
-    max-height: 300px;
-    overflow: auto;
-}
-
-    .action-notifications .content p {
-        margin-top: 0;
-        margin-bottom: 0;
-    }
-    .action-notifications .content :first-child {
-        font-weight: bold;
-        margin-bottom: 10px;
-        text-align: center;
-    }
-
 .container.main {
     max-width: 100%;
     display: flex;
@@ -39,54 +22,9 @@
     margin: 10px;
 }
 
-.printer-controller .content {
-    display: flex;
-    flex-direction: row;
-    justify-content: start;
-}
-
-    .printer-controller .content .container {
-        width: auto;
-    }
-
-.controllers{
-    display: flex;
-}
-
-.controller-container .content{
-    display: flex;
-    flex-direction: column;
-}
-
-.auto-home-button {
-    margin-left: 4px;
-    margin-right: 4px;
-    margin-top: 8px;
-}
-
-.extrusion-container .content{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.temperature-controller .content {
-    display: flex;
-    flex-direction: column;
-}
-
-.fan-controller .content{
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
 @media (max-width: 999px) {
     .container.side-bar {
         border-bottom: 1px solid #979797;
-    }
-    .printer-controller .content {
-        flex-direction: column;
     }
 }
 

@@ -1,0 +1,112 @@
+﻿@inject Printer printer
+
+<div class="component">
+    <div class="container border controller-container">
+        <div class="head">
+            <h5>Position</h5>
+        </div>
+        <div class="content">
+            <div class="controllers">
+                <Controller LeftRight="true" OnButtonClicked="@HorizotalMoveClick" />
+                <Controller LeftRight="false" OnButtonClicked="@VerticalMoveClick" style="margin-left: 40px;" />
+            </div>
+            <button type="button" class="btn btn-primary auto-home-button" @onclick="AutoHomeClick">Auto Home</button>
+        </div>
+    </div>
+    <div class="container border extrusion-container">
+        <div class="head">
+            <h5>Extrusion</h5>
+        </div>
+        <div class="content">
+            <Controller LeftRight="false" OnButtonClicked="@ExtrusionButtonClicked" />
+        </div>
+    </div>
+    <div class="container border temperature-controller">
+        <div class="head">
+            <h5>Temperatures</h5>
+        </div>
+        <div class="content">
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon1">Nozzle</span>
+                <input type="number" class="form-control" @bind-value="_hotEndTemp">
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon1">Bed</span>
+                <input type="number" class="form-control" @bind-value="_bedTemp">
+            </div>
+            <button type="button" class="btn btn-primary" @onclick="UpdateTemperatures">Update</button>
+        </div>
+    </div>
+    <div class="container border fan-controller">
+        <div class="head">
+            <h5>Fan</h5>
+        </div>
+        <div class="content">
+            <table>
+                <tbody>
+                    <tr>
+                        <td>Speed</td>
+                        <td><input type="range" class="form-range" min="0" max="100" step="1" id="speed-range" @bind-value="@_fanSpeed"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <button type="button" class="btn btn-primary" @onclick="UpdateFan">Update</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private double _hotEndTemp = 0;
+    private double _bedTemp = 0;
+    private double _fanSpeed;
+
+    protected override async Task OnInitializedAsync() {
+        _hotEndTemp = printer.State.Temperatures.HotEnd.Target;
+        _bedTemp = printer.State.Temperatures.Bed.Target;
+        _fanSpeed = printer.State.FanSpeed;
+    }
+
+    private async Task HorizotalMoveClick(Direction direction) {
+        var moveTask = direction switch {
+            Direction.Up => printer.MoveByAsync(y: 10),
+            Direction.Down => printer.MoveByAsync(y: -10),
+            Direction.Right => printer.MoveByAsync(x: 10),
+            Direction.Left => printer.MoveByAsync(x: -10),
+            _ => printer.MoveByAsync()
+        };
+
+        await moveTask;
+    }
+
+    private async Task VerticalMoveClick(Direction direction) {
+        var moveTask = direction switch {
+            Direction.Up => printer.MoveByAsync(z: 10),
+            Direction.Down => printer.MoveByAsync(z: -10),
+            _ => printer.MoveByAsync()
+        };
+
+        await moveTask;
+    }
+
+    private async Task ExtrusionButtonClicked(Direction direction) {
+        var moveTask = direction switch {
+            Direction.Up => printer.MoveByAsync(extrude: -10),
+            Direction.Down => printer.MoveByAsync(extrude: 10),
+            _ => printer.MoveByAsync()
+        };
+
+        await moveTask;
+    }
+
+    private async Task AutoHomeClick() {
+        await printer.AutoHomeAsync();
+    }
+
+    private async Task UpdateTemperatures() {
+        await printer.SetTemperatuesAsync(_hotEndTemp, _bedTemp);
+    }
+
+    private async Task UpdateFan() {
+        await printer.SetFanSpeedAsync(_fanSpeed / 100);
+    }
+}

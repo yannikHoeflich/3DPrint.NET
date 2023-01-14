@@ -16,10 +16,10 @@
                 @if (SubmitText != null && CancelText != null) {
                     <div class="modal-footer">
                         @if (CancelText != null) {
-                            <button type="button" class="btn btn-secondary" @onclick="Cancel">@CancelText</button>
+                            <Button ButtonType="@CancelButtonType" OnClick="@Cancel" Text="@CancelText" />
                         }
                         @if (SubmitText != null) {
-                            <button type="button" class="btn btn-primary" @onclick="Submit">@SubmitText</button>
+                            <Button ButtonType="@SubmitButtonType" OnClick="@Submit" Text="@SubmitText" />
                         }
                     </div>
                 }
@@ -43,6 +43,12 @@
 
     [Parameter]
     public string? CancelText { get; set; }
+
+    [Parameter]
+    public ButtonType SubmitButtonType { get; set; }
+
+    [Parameter]
+    public ButtonType CancelButtonType { get; set; }
 
     [Parameter]
     public EventCallback OnSubmit { get; set; }

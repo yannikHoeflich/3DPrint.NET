@@ -1,0 +1,7 @@
+﻿@inject Printer printer
+
+<div class="component">
+    @foreach (var message in printer.State.ActionNotifications) {
+        <p>@message</p>
+    }
+</div>

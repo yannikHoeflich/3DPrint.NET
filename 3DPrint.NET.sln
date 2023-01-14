@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "3DPrint.NET", "3DPrint.NET\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extensions", "Extensions", "{A2E83378-DE52-40B8-A397-37868CFB1FF0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestExtension", "TestExtension\TestExtension.csproj", "{4D55B11E-3FBB-4055-80A1-DD9E70919875}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestExtension", "TestExtension\TestExtension.csproj", "{4D55B11E-3FBB-4055-80A1-DD9E70919875}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,3 +1,5 @@
+using System.Reflection;
+
 using _3DPrint.NET.Connection;
 using _3DPrint.NET.Data;
 using _3DPrint.NET.Extensions;
@@ -6,6 +8,7 @@ using _3DPrint.NET.Logging;
 using _3DPrint.NET.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Weikio.PluginFramework.Abstractions;
@@ -87,7 +90,10 @@ internal class Program {
         services.AddSingleton<PrinterStateService>();
         services.AddSingleton<Printer>();
 
-        services.AddPluginFramework<IExtensionComponent>(s_extensionPath);
+        services.AddPluginFramework()
+                .AddPluginCatalog(new FolderPluginCatalog(s_extensionPath))
+                .AddPluginCatalog(new AssemblyPluginCatalog(typeof(Program).Assembly))
+                .AddPluginType<IExtensionComponent>();
     }
 
     private static async Task InitServices(IServiceProvider services) {
@@ -101,22 +107,31 @@ internal class Program {
             logger.LogInformation("extension folder created");
         }
 
-        var extensionCatalog = new FolderPluginCatalog(s_extensionPath, type => type.Implements<IExtension>());
+        var folderExtensionCatalog = new FolderPluginCatalog(s_extensionPath, type => type.Implements<IExtension>());
+        await folderExtensionCatalog.Initialize();
+        List<Plugin> assemplyExtensions = folderExtensionCatalog.GetPlugins();
 
-        await extensionCatalog.Initialize();
-
-        List<Plugin> assemplyExtensions = extensionCatalog.GetPlugins();
+        var assemblyExtensionCatalog = new AssemblyPluginCatalog(Assembly.GetExecutingAssembly(), type => type.Implements<IExtension>());
+        await assemblyExtensionCatalog.Initialize();
+        assemplyExtensions.AddRange(assemblyExtensionCatalog.GetPlugins());
 
         return assemplyExtensions.Select(extensionType => (IExtension?)Activator.CreateInstance(extensionType))
                                  .Where(x => x is not null)
-                                 .Select(x => x??new DefaultExtension())
+                                 .Select(x => x ?? new DefaultExtension())
                                  .ToArray();
     }
 
     private static async Task InitExtensionsAsync(ICollection<IExtension> extensions, ILogger<Program> logger) {
-        foreach(IExtension extension in extensions) {
+        foreach (IExtension extension in extensions) {
             logger.LogInformation("initializing {}", extension.GetType());
-            await extension.InitAsync();
+            Task.Run(() => {
+                try {
+                    extension.InitAsync();
+                } catch (Exception ex) {
+                    logger.LogError("extension {} hat an error while initializing!", extension.GetType());
+                    logger.LogDebug("{}", ex);
+                }
+            });
             logger.LogInformation("done initializing {}!", extension.GetType());
         }
     }
@@ -124,7 +139,14 @@ internal class Program {
     private static async Task StartExtensionsAsync(ICollection<IExtension> extensions, ILogger<Program> logger) {
         foreach (IExtension extension in extensions) {
             logger.LogInformation("starting {}", extension.GetType());
-            Task.Run(extension.RunAsync);
+            Task.Run(() => {
+                try {
+                    extension.RunAsync();
+                } catch (Exception ex){
+                    logger.LogError("extension {} hat error an while running!", extension.GetType());
+                    logger.LogDebug("{}", ex);
+                }
+            });
             logger.LogInformation("done starting {}!", extension.GetType());
         }
     }

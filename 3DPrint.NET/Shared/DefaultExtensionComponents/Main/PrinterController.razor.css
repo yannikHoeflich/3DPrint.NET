@@ -1,0 +1,50 @@
+﻿.component {
+    margin: 0;
+    padding 0;
+    border: none;
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+}
+
+    .component .container {
+        width: auto;
+    }
+
+.controllers {
+    display: flex;
+}
+
+.controller-container .content {
+    display: flex;
+    flex-direction: column;
+}
+
+.auto-home-button {
+    margin-left: 4px;
+    margin-right: 4px;
+    margin-top: 8px;
+}
+
+.extrusion-container .content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.temperature-controller .content {
+    display: flex;
+    flex-direction: column;
+}
+
+.fan-controller .content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+@media (max-width: 999px) {
+    .component {
+        flex-direction: column;
+    }
+}

@@ -10,5 +10,5 @@ namespace TestExtension;
 public partial class TestComponent : IExtensionComponent {
     public string Title {get;} = "Test";
 
-    public Location Location { get; } = Location.Sidebar;
+    public Location Location { get; } = Location.Main;
 }

@@ -16,7 +16,7 @@ public static class ExtensionMethods {
     public static Type GetType(string fullName) {
         Debug.Assert(fullName != null);
 
-        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies()) {
+        foreach (System.Reflection.Assembly assembly in AppDomain.CurrentDomain.GetAssemblies()) {
             Type t = assembly.GetType(fullName, false);
             if (t != null)
                 return t;

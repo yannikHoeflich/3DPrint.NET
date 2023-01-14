@@ -9,6 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extensions", "Extensions", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestExtension", "TestExtension\TestExtension.csproj", "{4D55B11E-3FBB-4055-80A1-DD9E70919875}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BedVisualizer", "BedVisualizer\BedVisualizer.csproj", "{A35B66D4-A407-4DD6-B747-99C61B79D722}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,12 +25,17 @@ Global
 		{4D55B11E-3FBB-4055-80A1-DD9E70919875}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4D55B11E-3FBB-4055-80A1-DD9E70919875}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4D55B11E-3FBB-4055-80A1-DD9E70919875}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A35B66D4-A407-4DD6-B747-99C61B79D722}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A35B66D4-A407-4DD6-B747-99C61B79D722}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A35B66D4-A407-4DD6-B747-99C61B79D722}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A35B66D4-A407-4DD6-B747-99C61B79D722}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{4D55B11E-3FBB-4055-80A1-DD9E70919875} = {A2E83378-DE52-40B8-A397-37868CFB1FF0}
+		{A35B66D4-A407-4DD6-B747-99C61B79D722} = {A2E83378-DE52-40B8-A397-37868CFB1FF0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F91C4363-87E8-4BE5-93EF-F256C92D093C}

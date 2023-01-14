@@ -44,7 +44,8 @@ internal class Program {
         logger.LogInformation("- build Web Application");
 
         logger.LogInformation("loading Extensions . . .");
-        ICollection<IExtension> extensions = await LoadExtensionsAsync(logger);
+        ICollection<IExtension> extensions = await LoadExtensionsAsync<IExtension>(logger, () => new DefaultExtension());
+        ICollection<IExtensionScript> scripts = await LoadExtensionsAsync<IExtensionScript>(logger, () => new DefaultExtensionScript());
         logger.LogInformation("loading Extensions done!");
         logger.LogInformation("{} Extensions found", extensions.Count);
 
@@ -55,6 +56,10 @@ internal class Program {
         logger.LogInformation($"starting extensions . . .");
         await StartExtensionsAsync(extensions, logger);
         logger.LogInformation($"done loading extensions!");
+
+        logger.LogInformation($"loading extension scripts . . .");
+        LoadExtensionScripts(scripts, app, logger);
+        logger.LogInformation($"done loading extension scripts!");
 
         logger.LogInformation($"starting Web Application . . .");
 
@@ -76,6 +81,14 @@ internal class Program {
         app.Run();
     }
 
+    private static void LoadExtensionScripts(ICollection<IExtensionScript> extensions, WebApplication app, ILogger<Program> logger) {
+        var scriptService = app.Services.GetService<ScriptService>();
+
+        foreach (var urls in extensions) {
+            scriptService.AddUrls(urls.ScriptUrls);
+        }
+    }
+
     public static ILogger<T> GetLogger<T>() {
         if (s_app is null)
             return null;
@@ -91,10 +104,11 @@ internal class Program {
         services.AddSingleton<Printer>();
 
         services.AddSingleton<SavingService>();
+        services.AddSingleton<ScriptService>();
 
         services.AddPluginFramework()
-                .AddPluginCatalog(new FolderPluginCatalog(s_extensionPath))
                 .AddPluginCatalog(new AssemblyPluginCatalog(typeof(Program).Assembly))
+                .AddPluginCatalog(new FolderPluginCatalog(s_extensionPath))
                 .AddPluginType<IExtensionComponent>();
     }
 
@@ -105,23 +119,23 @@ internal class Program {
         await services.GetService<Printer>().InitAsync();
     }
 
-    private static async Task<ICollection<IExtension>> LoadExtensionsAsync(ILogger<Program> logger) {
+    private static async Task<ICollection<T>> LoadExtensionsAsync<T>(ILogger<Program> logger, Func<T> createDefault) {
         if (!Directory.Exists(s_extensionPath)) {
             Directory.CreateDirectory(s_extensionPath);
             logger.LogInformation("extension folder created");
         }
 
-        var folderExtensionCatalog = new FolderPluginCatalog(s_extensionPath, type => type.Implements<IExtension>());
+        var folderExtensionCatalog = new FolderPluginCatalog(s_extensionPath, type => type.Implements<T>());
         await folderExtensionCatalog.Initialize();
         List<Plugin> assemplyExtensions = folderExtensionCatalog.GetPlugins();
 
-        var assemblyExtensionCatalog = new AssemblyPluginCatalog(Assembly.GetExecutingAssembly(), type => type.Implements<IExtension>());
+        var assemblyExtensionCatalog = new AssemblyPluginCatalog(Assembly.GetExecutingAssembly(), type => type.Implements<T>());
         await assemblyExtensionCatalog.Initialize();
         assemplyExtensions.AddRange(assemblyExtensionCatalog.GetPlugins());
 
-        return assemplyExtensions.Select(extensionType => (IExtension?)Activator.CreateInstance(extensionType))
+        return assemplyExtensions.Select(extensionType => (T?)Activator.CreateInstance(extensionType))
                                  .Where(x => x is not null)
-                                 .Select(x => x ?? new DefaultExtension())
+                                 .Select(x => x ?? createDefault())
                                  .ToArray();
     }
 

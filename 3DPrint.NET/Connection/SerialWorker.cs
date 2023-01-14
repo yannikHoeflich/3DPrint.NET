@@ -103,6 +103,12 @@ internal class SerialWorker {
     public Task<string[]> GetSerialPortsAsync() => Task.Run(SerialPort.GetPortNames);
 
     public async Task SwitchSerialPortAsync(string portName, int baudRate) {
+        var availablePorts = await GetSerialPortsAsync();
+
+        if(!availablePorts.Contains(portName)) { 
+            return; 
+        }
+
         var newPort = new SerialPort();
         PortName = portName;
         BaudRate = baudRate;

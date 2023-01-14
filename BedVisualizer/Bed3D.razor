@@ -1,0 +1,52 @@
+﻿@using Microsoft.Extensions.Logging;
+@using Plotly.Blazor
+@using Plotly.Blazor.Traces
+@using Plotly.Blazor.Traces.Scatter3DLib;
+@using System.Text.Json;
+@using _3DPrint.NET.Connection;
+@using _3DPrint.NET.Services;
+
+@inject Printer printer
+@inject ILogger<Bed3D> logger
+
+<PlotlyChart @bind-Config="config" @bind-Layout="layout" @bind-Data="data" @ref="chart" />
+
+@code {
+    PlotlyChart chart;
+    Config config = new Config();
+    Layout layout = new Layout() {
+            AutoSize = true,
+            Margin = new Plotly.Blazor.LayoutLib.Margin(){B = 0, L = 0, T = 10, R = 0},
+    };
+    // Using of the interface IList is important for the event callback!
+    IList<ITrace> data = new List<ITrace>{
+            new Surface{
+                Name = "Bed",
+                Z = new List<object>(),
+            }
+        };
+    protected override async Task OnAfterRenderAsync(bool firstRender) {
+        if (!firstRender)
+            return;
+
+        if (printer.State.ConnectionState != ConnectionState.Connected)
+            return;
+
+        logger.LogInformation("requesting mesh info");
+        var mesh = await printer.GetBedlevelingMeshAsync();
+        logger.LogInformation("mesh received");
+
+        var surface = (Surface)data.First();
+        for (int x = 0; x < mesh.GetLength(0); x++) {
+            List<object> row = new List<object>();
+            for (int y = 0; y < mesh.GetLength(1); y++) {
+                row.Add(mesh[x, y]);
+            }
+            surface.Z.Add(row);
+        }
+
+
+        await chart.Update();
+        StateHasChanged();
+    }
+}

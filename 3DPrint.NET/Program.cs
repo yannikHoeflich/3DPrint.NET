@@ -90,6 +90,8 @@ internal class Program {
         services.AddSingleton<PrinterStateService>();
         services.AddSingleton<Printer>();
 
+        services.AddSingleton<SavingService>();
+
         services.AddPluginFramework()
                 .AddPluginCatalog(new FolderPluginCatalog(s_extensionPath))
                 .AddPluginCatalog(new AssemblyPluginCatalog(typeof(Program).Assembly))
@@ -97,6 +99,8 @@ internal class Program {
     }
 
     private static async Task InitServices(IServiceProvider services) {
+        await services.GetService<SavingService>().LoadAsync();
+
         await services.GetService<PrinterStateService>().InitAsync();
         await services.GetService<Printer>().InitAsync();
     }

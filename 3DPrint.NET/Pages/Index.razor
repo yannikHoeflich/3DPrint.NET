@@ -2,8 +2,9 @@
 @using _3DPrint.NET.Extensions;
 @using _3DPrint.NET.Shared.BootstrapComponents
 
-@inject Printer printer
+@inject Printer Printer
 @inject IEnumerable<IExtensionComponent> ExtensionComponents
+@inject SavingService SavingService
 
 <PageTitle>Index</PageTitle>
 
@@ -18,7 +19,7 @@
                 <tbody>
                     <tr>
                         <td>Connection</td>
-                        <td class="@printer.State.ConnectionState.GetColorClass()">@printer.State.ConnectionState.ToWords()</td>
+                        <td class="@Printer.State.ConnectionState.GetColorClass()">@Printer.State.ConnectionState.ToWords()</td>
                     </tr>
                     <tr>
                         <td>Port</td>
@@ -76,20 +77,20 @@
                 <tbody>
                     <tr>
                         <td scope="row">Hot end Temp</td>
-                        <td>@printer.State.Temperatures.HotEnd.Current</td>
-                        <td>@printer.State.Temperatures.HotEnd.Target</td>
+                        <td>@Printer.State.Temperatures.HotEnd.Current</td>
+                        <td>@Printer.State.Temperatures.HotEnd.Target</td>
                     </tr>
                     <tr>
                         <td scope="row">Bed Temp</td>
-                        <td>@printer.State.Temperatures.Bed.Current</td>
-                        <td>@printer.State.Temperatures.Bed.Target</td>
+                        <td>@Printer.State.Temperatures.Bed.Current</td>
+                        <td>@Printer.State.Temperatures.Bed.Target</td>
                     </tr>
                     <tr>
                         <td scope="row">Position</td>
                         <td>
-                            X: @(Math.Round(printer.State.Position.X * 10) / 10)<br />
-                            Y: @(Math.Round(printer.State.Position.Y * 10) / 10)<br />
-                            Z: @(Math.Round(printer.State.Position.Z * 10) / 10)<br />
+                            X: @(Math.Round(Printer.State.Position.X * 10) / 10)<br />
+                            Y: @(Math.Round(Printer.State.Position.Y * 10) / 10)<br />
+                            Z: @(Math.Round(Printer.State.Position.Z * 10) / 10)<br />
                         </td>
                         <td>-<br />-<br />-</td>
                     </tr>
@@ -110,7 +111,7 @@
                     </tr>
                     <tr>
                         <td scope="row">Fan Speed</td>
-                        <td>@(Math.Round(printer.State.FanSpeed * 100 * 10) / 10)%</td>
+                        <td>@(Math.Round(Printer.State.FanSpeed * 100 * 10) / 10)%</td>
                         <td>-</td>
                     </tr>
                 </tbody>
@@ -131,7 +132,7 @@
 </div>
 
 <div class="container main">
-    @if (printer.IsPrinting) {
+    @if (Printer.IsPrinting) {
         <div class="container border print-options">
             <div class="head">
                 <h5>Printing options</h5>
@@ -141,23 +142,23 @@
                     <tbody>
                         <tr>
                             <td>Progress</td>
-                            <td>@(Math.Round(printer.CurrentPrint.GetPrintingProgress() * 100 * 10) / 10)%</td>
+                            <td>@(Math.Round(Printer.CurrentPrint.GetPrintingProgress() * 100 * 10) / 10)%</td>
                         </tr>
                         <tr>
                             <td>Total Time</td>
-                            <td>@printer.CurrentPrint.TotalTime.ToString(@"hh\:mm\:ss")</td>
+                            <td>@Printer.CurrentPrint.TotalTime.ToString(@"hh\:mm\:ss")</td>
                         </tr>
                         <tr>
                             <td>Print Time</td>
-                            <td>@TimeSpan.FromSeconds((int)printer.CurrentPrint.ElapsedTime.TotalSeconds).ToString(@"hh\:mm\:ss")</td>
+                            <td>@TimeSpan.FromSeconds((int)Printer.CurrentPrint.ElapsedTime.TotalSeconds).ToString(@"hh\:mm\:ss")</td>
                         </tr>
                         <tr>
                             <td>Print Time Left</td>
-                            <td>@TimeSpan.FromSeconds((int)printer.CurrentPrint.TotalTime.TotalSeconds - (int)printer.CurrentPrint.ElapsedTime.TotalSeconds).ToString(@"hh\:mm\:ss")</td>
+                            <td>@TimeSpan.FromSeconds((int)Printer.CurrentPrint.TotalTime.TotalSeconds - (int)Printer.CurrentPrint.ElapsedTime.TotalSeconds).ToString(@"hh\:mm\:ss")</td>
                         </tr>
                     </tbody>
                 </table>
-                @if (printer.PrintState == PrintState.Paused) {
+                @if (Printer.PrintState == PrintState.Paused) {
                     <button type="button" class="btn btn-success" @onclick="ResumePrint">Resume</button>
                 } else {
                     <button type="button" class="btn btn-warning" @onclick="PausePrint">Pause</button>
@@ -207,7 +208,7 @@
             }
         });
 
-        _printerSize = printer.State.GetSize();
+        _printerSize = Printer.State.GetSize();
 
         await RefreshSerialPorts();
     }
@@ -227,19 +228,19 @@
 
     private async Task PrintFile() {
         _printDialogVisible = false;
-        await printer.Print(_fileStream);
+        await Printer.Print(_fileStream);
     }
 
     private async Task CancelPrint() {
-        await printer.CurrentPrint.CancelPrintAsync();
+        await Printer.CurrentPrint.CancelPrintAsync();
     }
 
     private async Task PausePrint() {
-        await printer.CurrentPrint.PausePrintAsync();
+        await Printer.CurrentPrint.PausePrintAsync();
     }
 
     private async Task ResumePrint() {
-        await printer.CurrentPrint.ResumePrintAsync();
+        await Printer.CurrentPrint.ResumePrintAsync();
     }
 
     private async Task DisposeFile() {

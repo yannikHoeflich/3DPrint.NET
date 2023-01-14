@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using _3DPrint.NET.Connection;
 using _3DPrint.NET.Data;
 using _3DPrint.NET.Data.Processors;
+using _3DPrint.NET.Saving;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.FileSystemGlobbing.Internal.PathSegments;
 
@@ -27,14 +28,24 @@ public class Printer {
 
     public bool IsPrinting => PrintState != PrintState.None;
 
-    public Printer(PrinterStateService printerState) {
+    private readonly SavingService _savingService;
+
+    public Printer(PrinterStateService printerState, SavingService savingService) {
         State = printerState;
+        _savingService = savingService;
         Current = this;
     }
 
     public async Task InitAsync() {
         if (State.ConnectionState == ConnectionState.Connected)
             await PrinterInitializer.Init();
+
+        MainConfig config = _savingService.GetConfig<MainConfig>();
+
+        if (config.SerialPort == null || config.SerialPort.Port == null)
+            return;
+
+        await SerialMonitor.ChangeSerialPortAsync(config.SerialPort.Port, config.SerialPort.BaudRate);
     }
 
     public async Task MoveToAsync(double x = double.NaN, double y = double.NaN, double z = double.NaN, double extrude = double.NaN) {

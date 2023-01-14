@@ -6,6 +6,7 @@ using System.Security;
 
 using _3DPrint.NET.Data;
 using _3DPrint.NET.Data.EventArguments;
+using _3DPrint.NET.Saving;
 using _3DPrint.NET.Services;
 
 namespace _3DPrint.NET.Connection;
@@ -71,9 +72,6 @@ public static class SerialMonitor {
             Message = serialMessage
         };
 
-        if (args.Message.Code == SerialCode.Unknown)
-            Console.WriteLine("unknown");
-
         await RunTasks(args, s_newSerialMessageReceivedActions);
 
         if (args.DefaultProcessing) {
@@ -112,8 +110,12 @@ public static class SerialMonitor {
         await SerialWorker.Current.SwitchSerialPortAsync(portName, baudRate);
         s_okIsAwaited = false;
         await UpdateConnectionState();
-        if (ConnectionState == ConnectionState.Connected)
-            await PrinterInitializer.Init();
+
+        if (ConnectionState != ConnectionState.Connected)
+            return;
+
+        await PrinterInitializer.Init();
+
     }
 
     public static async Task UpdateConnectionState() {
@@ -131,9 +133,30 @@ public static class SerialMonitor {
 
         SerialMessage[] responses = await SendAndWaitForResponseAsync(new GCodeMessage(GCode.SerialPrint, "ping"), 5000);
 
-        ConnectionState = responses.Length == 0 || responses[1].Full != "ping"
+        ConnectionState = responses.Length == 0 || responses[0].Full != "ping"
             ? ConnectionState.NoResponse
             : ConnectionState.Connected;
+
+        if (ConnectionState != ConnectionState.Connected)
+            return;
+
+        if (Config.Current == null)
+            return;
+        MainConfig config = Config.Current.Get<MainConfig>();
+        if (config.SerialPort == null) {
+            config.SerialPort = new SerialPortData() {
+                Port = SerialWorker.Current.PortName,
+                BaudRate = SerialWorker.Current.BaudRate
+            };
+            await SavingService.Current.SaveAsync();
+        }
+
+        if (config.SerialPort.Port == SerialWorker.Current.PortName && config.SerialPort.BaudRate == SerialWorker.Current.BaudRate)
+            return;
+
+        config.SerialPort.Port = SerialWorker.Current.PortName;
+        config.SerialPort.BaudRate = SerialWorker.Current.BaudRate;
+        await SavingService.Current.SaveAsync();
     }
 
 

@@ -16,15 +16,16 @@
     Config config = new Config();
     Layout layout = new Layout() {
             AutoSize = true,
-            Margin = new Plotly.Blazor.LayoutLib.Margin(){B = 0, L = 0, T = 10, R = 0},
-    };
-    // Using of the interface IList is important for the event callback!
+            Margin = new Plotly.Blazor.LayoutLib.Margin() { B = 0, L = 0, T = 10, R = 0 },
+        };
+
     IList<ITrace> data = new List<ITrace>{
             new Surface{
                 Name = "Bed",
                 Z = new List<object>(),
             }
         };
+
     protected override async Task OnAfterRenderAsync(bool firstRender) {
         if (!firstRender)
             return;
@@ -47,6 +48,5 @@
 
 
         await chart.Update();
-        StateHasChanged();
     }
 }

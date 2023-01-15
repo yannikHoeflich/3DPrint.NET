@@ -128,7 +128,7 @@ public class Printer {
     }
 
     public async Task Print(IEnumerable<string> gCode) {
-        CurrentPrint = new PrintingManager(this, gCode);
+        CurrentPrint = new PrintingManager(this, _savingService, gCode);
         await CurrentPrint.StartAsync();
     }
 

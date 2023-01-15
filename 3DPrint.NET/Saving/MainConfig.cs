@@ -2,8 +2,7 @@
 
 public class MainConfig {
     public SerialPortData? SerialPort { get; set; }
-
-
+    public bool EnhanceGCode { get; set; } = true;
 }
 
 public class SerialPortData {

@@ -3,10 +3,12 @@ using _3DPrint.NET.Data;
 using _3DPrint.NET.Data.EventArguments;
 using _3DPrint.NET.Data.Processors;
 using _3DPrint.NET.Data.Values;
+using _3DPrint.NET.Saving;
 
 namespace _3DPrint.NET.Services;
 public class PrintingManager : IAsyncDisposable {
     private readonly Printer _printer;
+    private readonly SavingService _savingService;
     private string[]? _gCode;
     private TemperatureContainer _beforePauseTemperatures;
     private int _beforePauseFanSpeed;
@@ -21,9 +23,11 @@ public class PrintingManager : IAsyncDisposable {
     public TimeSpan TotalTime { get; private set; }
     public TimeSpan ElapsedTime => DateTimeGetter.Now - _printStart;
 
-    public PrintingManager(Printer printer, IEnumerable<string> gCode) {
+    public PrintingManager(Printer printer, SavingService savingService, IEnumerable<string> gCode) {
         _printer = printer;
-        _gCode = gCode.Select(x => x.Split(';')[0]).Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
+        _savingService = savingService;
+
+        _gCode = PreprocessGCode(gCode);
     }
 
 
@@ -130,6 +134,14 @@ public class PrintingManager : IAsyncDisposable {
         var analyzer = new GCodeAnalyzer(_gCode, CurrentGCodeLine);
         TotalTime = analyzer.Analyze();
         _lastAnalyzed = DateTimeGetter.Now;
+    }
+
+    private string[] PreprocessGCode(IEnumerable<string> gCode) {
+        var processedGcode = _savingService.GetConfig<MainConfig>().EnhanceGCode 
+                            ? gCode.Select(x => x.Split(';')[0]).Where(x => !string.IsNullOrWhiteSpace(x))
+                            : gCode;
+
+        return processedGcode.ToArray();
     }
 
     public async ValueTask DisposeAsync() {

@@ -5,13 +5,14 @@ public static class DateTimeGetter {
     private static DateTime s_startDateTime;
 
     static DateTimeGetter() {
-        s_startTicks = Environment.TickCount;
-        s_startDateTime = DateTime.Now;
+        Sync();
     }
 
-    public static DateTime Now {
-        get {
-            return s_startDateTime.AddMilliseconds(Environment.TickCount - s_startTicks);
-        }
+    public static DateTime Now => s_startDateTime.AddMilliseconds(Environment.TickCount - s_startTicks);
+
+    public static Task SyncAsync() => Task.Run(Sync);
+    private static void Sync() { 
+        s_startTicks = Environment.TickCount;
+        s_startDateTime = DateTime.Now;
     }
 }

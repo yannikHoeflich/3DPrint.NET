@@ -5,5 +5,6 @@
 - Options panel
 - Warn when switching serial port while printing
 - Readme, docs, etc.
-- Split `Index.razor` in multiple components (maybe in extensions)
-- Save configuration
+- extension installer
+- copy js and css from extensions to wwwroot
+- API
